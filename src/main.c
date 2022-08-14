@@ -13,8 +13,17 @@ pthread_mutex_t _prime_count_lock;
 pthread_mutex_t _total_count_lock;
 #endif
 
+void print_header() 
+{
+	printf("\nsimple cpu benchmark\n");
+	printf("freshbit.se\n\n");
+	fflush(stdout);
+}
+
 int main(int argc, char **argv)
 {
+	print_header();
+
 	int number_of_threads = get_processor_count();
 	
 #ifdef _WIN32
@@ -24,14 +33,13 @@ int main(int argc, char **argv)
 	pthread_t threads[number_of_threads];
 #endif
 	const unsigned long default_number = 100000000;
-
 	unsigned long big_number = default_number;
-	unsigned long from_number = 1, to_number;
+	unsigned long from_number, to_number;
 	int i;
 	
 	if (argc >1)
 		parse_args(argc, argv, &big_number, &number_of_threads);
-	
+
 	if (big_number <= 0)
 		big_number = default_number;
 	
@@ -39,7 +47,7 @@ int main(int argc, char **argv)
 	unsigned long numbers_per_thread = ceil( (big_number / number_of_threads) );
 	struct range ranges[number_of_threads];
 	
-	printf("Crunching primes from number %ld using %d threads", big_number, number_of_threads);
+	printf("crunching primes from number %ld using %d threads\n", big_number, number_of_threads);
 	fflush(stdout);
 
 #ifndef _WIN32
@@ -48,10 +56,10 @@ int main(int argc, char **argv)
 	if (pthread_mutex_init(&_total_count_lock, NULL) != 0)
 		die("pthread_mutex_init failed");
 #endif
-
 	time_t start_time, end_time, elapsed_time;
 	time(&start_time);
-	
+
+	from_number = 1;
 	for (i = 0; i < number_of_threads; i++)
 	{
 		struct range thread_range;
@@ -62,11 +70,14 @@ int main(int argc, char **argv)
 		thread_range.to = to_number;
 		ranges[i] = thread_range;
 				
+		#ifdef DEBUG
+		printf("f: %ld t: %ld\n", from_number, to_number);
+		#endif
+
 		/*
 		 *	_beginthreadex returns 0 on error
 		 *	pthread returns 0 on success :)
 		 */
-		 
 #ifdef _WIN32
 		threads[i] = (HANDLE)(intptr_t)_beginthreadex(NULL, 0, &crunch_range_on_thread, &ranges[i], 0, &thread_ids[i]);
 		if (threads[i] == 0)
