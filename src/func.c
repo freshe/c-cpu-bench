@@ -1,5 +1,5 @@
 /* 
- * Simple cpu test
+ * Simple cpu bench
  * Fredrik B (info@freshbit.se)
  */
 
