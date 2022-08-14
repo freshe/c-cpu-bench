@@ -5,17 +5,18 @@
 
 #include "cpu.h"
 
-void showprogress(unsigned long *n)
+void show_progress(unsigned long *n)
 {
 	double progress = 0;
-	while(_totalcount < (*n))
+	
+	while(_total_count < (*n))
 	{
-		progress = 100.0 * _totalcount / (*n);
+		progress = 100.0 * _total_count / (*n);
 		
 		printf("\r");
-		printf("%d%% (%lu/%lu)", (int)progress, _totalcount, *n);
+		printf("%d%% (%lu/%lu)", (int)progress, _total_count, *n);
 		fflush(stdout);
-#ifdef WINDOWS
+#ifdef _WIN32
 		Sleep(1000);
 #else
 		sleep(1);
@@ -23,124 +24,134 @@ void showprogress(unsigned long *n)
 	}
 }
 
-int getprocessors()
+int get_processor_count()
 {
-	int nCpus = 1;
-#ifdef WINDOWS
+	int count = 1;
+
+#ifdef _WIN32
 	LPSYSTEM_INFO info = malloc(sizeof(SYSTEM_INFO));
 	if (info == NULL) 
 	{
 		die("Error allocating memory");
 	}
 	GetNativeSystemInfo(info);
-	nCpus = (int)info->dwNumberOfProcessors;
+	count = (int)info->dwNumberOfProcessors;
 	free(info);
 #else
-	nCpus = (int)sysconf(_SC_NPROCESSORS_ONLN);
+	count = (int)sysconf(_SC_NPROCESSORS_ONLN);
 #endif
-	if (nCpus < 1) nCpus = 1;
-	return nCpus;
+	if (count < 1)
+		count = 1;
+
+	return count;
 }
 
-int isprime(unsigned long n)
+int is_prime(unsigned long number)
 {
-	if (n <= 1) return 0;
+	if (number <= 1) 
+		return 0;
 	
-	unsigned long j, start = ceil(sqrt(n));
-	int ispr = 1;
+	unsigned long j, start = ceil(sqrt(number));
+	int is_prime = 1;
 
 	for (j = start; j >= 2; j--)
 	{
-		if (n % j == 0) 
+		if (number % j == 0) 
 		{
-			ispr = 0;
+			is_prime = 0;
 			break;
 		}
 	}
-	return ispr;
+
+	return is_prime;
 }
 
-void increment_primecount()
+void increment_prime_count()
 {
-#ifdef WINDOWS
-	InterlockedExchangeAdd(&_primecount, 1);
+#ifdef _WIN32
+	InterlockedExchangeAdd(&_prime_count, 1);
 #else
-	pthread_mutex_lock(&primelock);
-	_primecount++;
-	pthread_mutex_unlock(&primelock);
+	pthread_mutex_lock(&_prime_count_lock);
+	_prime_count++;
+	pthread_mutex_unlock(&_prime_count_lock);
 #endif
 }
 
-void increment_totalcount()
+void increment_total_count()
 {
-#ifdef WINDOWS
-	InterlockedExchangeAdd(&_totalcount, 1);
+#ifdef _WIN32
+	InterlockedExchangeAdd(&_total_count, 1);
 #else
-	pthread_mutex_lock(&totlock);
-	_totalcount++;
-	pthread_mutex_unlock(&totlock);
+	pthread_mutex_lock(&_total_count_lock);
+	_total_count++;
+	pthread_mutex_unlock(&_total_count_lock);
 #endif
 }
 
-void numbercruncher(unsigned long f, unsigned long t)
+void crunch_range(unsigned long from, unsigned long to)
 {
 	unsigned long i;
-	for (i = f; i <= t; i++)
+
+	for (i = from; i <= to; i++)
 	{
-		if (isprime(i))
-			increment_primecount();
-		increment_totalcount();
+		if (is_prime(i))
+			increment_prime_count();
+		
+		increment_total_count();
 	}
 }
 
-#ifdef WINDOWS
-unsigned __stdcall cputhread(void *args)
+#ifdef _WIN32
+unsigned __stdcall crunch_range_on_thread(void *args)
 {
-	struct ft *ftptr = (struct ft *)args;
-	numbercruncher(ftptr->f, ftptr->t);
+	struct range *thread_range = (struct range *)args;
+	crunch_range(thread_range->from, thread_range->to);
 	_endthreadex(0);
 	return 0;
 }
 #else
-void *cputhread(void *args)
+void *crunch_range_on_thread(void *args)
 {
-	struct ft *ftptr = (struct ft *)args;
-	numbercruncher(ftptr->f, ftptr->t);
+	struct range *thread_range = (struct range *)args;
+	crunch_range(thread_range->from, thread_range->to);
 	pthread_exit(0);
 	return NULL;
 }
 #endif
 
-void parseargs(int argc, char *argv[], unsigned long *n, int *t)
+void parse_args(int argc, char *argv[], unsigned long *n, int *t)
 {
 	int i;
+
 	for(i = 1; i < argc; i++)
 	{
-		if (argv[i][0] == '-')
+		if (argv[i][0] != '-')
 		{
-			if (argc > i+1)
+			continue;
+		}
+
+		if (argc > i+1)
+		{
+			switch(argv[i][1])
 			{
-				switch(argv[i][1])
-				{
-					case 't': 
-						*t = atol(argv[i+1]);
-						break;
-					case 'n':
-						*n = atol(argv[i+1]);
-						break;
-					default:
-						break;
-				}
+				case 't': 
+					*t = atol(argv[i+1]);
+					break;
+				case 'n':
+					*n = atol(argv[i+1]);
+					break;
+				default:
+					break;
 			}
-			else 
-			{
-				die("\nInvalid arguments! -t [number of threads] -n [number to crunch]\n");
-			}
+		}
+		else 
+		{
+			die("\nInvalid arguments! -t [number of threads] -n [number to crunch]\n");
 		}
 	}
 }
 
-void die(char * msg)
+void die(char *msg)
 {
 	printf("\n%s\n", msg);
 	exit(1);

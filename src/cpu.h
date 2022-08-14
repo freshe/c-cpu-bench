@@ -8,35 +8,36 @@
 #include <math.h>
 #include <time.h>
 
-#ifdef WINDOWS
+#ifdef _WIN32
 #include <windows.h>
 #else
 #include <unistd.h>
 #include <pthread.h>
-extern pthread_mutex_t primelock;
-extern pthread_mutex_t totlock;
+extern pthread_mutex_t _prime_count_lock;
+extern pthread_mutex_t _total_count_lock;
 #endif
 
-extern unsigned long _primecount;
-extern unsigned long _totalcount;
+extern unsigned long _prime_count;
+extern unsigned long _total_count;
 
-struct ft
+struct range
 {
-	unsigned long f;
-	unsigned long t;
+	unsigned long from;
+	unsigned long to;
 };
 
-void showprogress(unsigned long *);
-int getprocessors();
-int isprime(unsigned long);
-void increment_primecount();
-void increment_totalcount();
-void numbercruncher(unsigned long, unsigned long);
-#ifdef WINDOWS
-unsigned __stdcall cputhread(void *);
-LPSYSTEM_INFO getsysteminfo();
-#else
-void * cputhread(void *);
-#endif
-void parseargs(int argc, char **, unsigned long *, int *);
+void show_progress(unsigned long *);
+int get_processor_count();
+int is_prime(unsigned long);
+void increment_prime_count();
+void increment_total_count();
+void crunch_range(unsigned long, unsigned long);
+void parse_args(int argc, char **, unsigned long *, int *);
 void die(char * msg);
+
+#ifdef _WIN32
+unsigned __stdcall crunch_range_on_thread(void *);
+LPSYSTEM_INFO get_systeminfo();
+#else
+void *crunch_range_on_thread(void *);
+#endif

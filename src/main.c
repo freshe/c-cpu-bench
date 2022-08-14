@@ -5,108 +5,105 @@
 
 #include "cpu.h"
 
-unsigned long _primecount = 0;
-unsigned long _totalcount = 0;
+unsigned long _prime_count = 0;
+unsigned long _total_count = 0;
 
-#ifndef WINDOWS
-pthread_mutex_t primelock;
-pthread_mutex_t totlock;
+#ifndef _WIN32
+pthread_mutex_t _prime_count_lock;
+pthread_mutex_t _total_count_lock;
 #endif
 
 int main(int argc, char **argv)
 {
-	//Get number of cpus
-	int nThreads = getprocessors();
-#ifdef WINDOWS
-	HANDLE thread[nThreads];
+	int number_of_threads = get_processor_count();
+	
+#ifdef _WIN32
+	HANDLE threads[number_of_threads];
+	unsigned thread_ids[number_of_threads];
 #else
-	pthread_t thread[nThreads];
+	pthread_t threads[number_of_threads];
 #endif
+	const unsigned long default_number = 100000000;
 
-	//Standard values
-	const unsigned long defaultNumber = 100000000;
-	unsigned long bigNumber = defaultNumber, from = 1, tom;
+	unsigned long big_number = default_number;
+	unsigned long from_number = 1, to_number;
 	int i;
 	
-	//If arguments was passed
 	if (argc >1)
-		parseargs(argc, argv, &bigNumber, &nThreads);
+		parse_args(argc, argv, &big_number, &number_of_threads);
 	
-	//No use unless a decent number size
-	if (bigNumber <= 0)
-		bigNumber = defaultNumber;
+	if (big_number <= 0)
+		big_number = default_number;
 	
-	//Calculate number of operations per thread
-	unsigned long per_thread = ceil( (bigNumber / nThreads) );
-	struct ft ftptr[nThreads];
-	unsigned threadId[nThreads];
+	/* Number of operations per thread */
+	unsigned long numbers_per_thread = ceil( (big_number / number_of_threads) );
+	struct range ranges[number_of_threads];
 	
-	printf("Crunching primes from number %ld using %d threads", bigNumber, nThreads);
+	printf("Crunching primes from number %ld using %d threads", big_number, number_of_threads);
 	fflush(stdout);
 
-#ifndef WINDOWS
-	if (pthread_mutex_init(&primelock, NULL) != 0)
+#ifndef _WIN32
+	if (pthread_mutex_init(&_prime_count_lock, NULL) != 0)
 		die("pthread_mutex_init failed");
-	if (pthread_mutex_init(&totlock, NULL) != 0)
+	if (pthread_mutex_init(&_total_count_lock, NULL) != 0)
 		die("pthread_mutex_init failed");
 #endif
 
-	//Start time
-	time_t start, end, diff;
-	time(&start);
+	time_t start_time, end_time, elsaped_time;
+	time(&start_time);
 	
-	for(i = 0; i < nThreads; i++)
+	for (i = 0; i < number_of_threads; i++)
 	{
-		struct ft fromtom;
-		tom = from + per_thread;
-		if (tom > bigNumber) tom = bigNumber;
+		struct range thread_range;
+		to_number = from_number + numbers_per_thread;
+		if (to_number > big_number) to_number = big_number;
 		
-		fromtom.f = from;
-		fromtom.t = tom;
-		ftptr[i] = fromtom;
+		thread_range.from = from_number;
+		thread_range.to = to_number;
+		ranges[i] = thread_range;
 				
 		/*
 		 *	_beginthreadex returns 0 on error
 		 *	pthread returns 0 on success :)
 		 */
 		 
-#ifdef WINDOWS
-		thread[i] = (HANDLE)(intptr_t)_beginthreadex(NULL, 0, &cputhread, &ftptr[i], 0, &threadId[i]);
-		if (thread[i] == 0)
+#ifdef _WIN32
+		threads[i] = (HANDLE)(intptr_t)_beginthreadex(NULL, 0, &crunch_range_on_thread, &ranges[i], 0, &thread_ids[i]);
+		if (threads[i] == 0)
 			die("Error creating thread");
 #else	
-		if (pthread_create(&thread[i], NULL, &cputhread, &ftptr[i]) != 0)
+		if (pthread_create(&threads[i], NULL, &crunch_range_on_thread, &ranges[i]) != 0)
 			die("Error creating thread");
 #endif
-		from += per_thread + 1;
+		from_number += numbers_per_thread + 1;
 	}
 
 	printf("\n");
-	showprogress(&bigNumber);
+	show_progress(&big_number);
 
-#ifdef WINDOWS
-	WaitForMultipleObjects(nThreads, thread, 1, INFINITE);
+#ifdef _WIN32
+	WaitForMultipleObjects(number_of_threads, threads, 1, INFINITE);
 #endif
 
-	for(i = 0; i < nThreads; i++)
+	for (i = 0; i < number_of_threads; i++)
 	{
-#ifdef WINDOWS
+#ifdef _WIN32
 		CloseHandle(thread[i]);
 #else
-		if (pthread_join(thread[i], NULL))
+		if (pthread_join(threads[i], NULL) != 0)
 			die("Error joining thread");
 #endif	
 	}
 	
-	//End time
-	time(&end);
-	diff = end - start;
+	time(&end_time);
+	elsaped_time = end_time - start_time;
 	
-	printf("\nFound %ld primes in %ld seconds\n", _primecount, diff);
+	printf("\nFound %ld primes in %ld seconds\n", _prime_count, elsaped_time);
 	
-#ifndef WINDOWS
-	pthread_mutex_destroy(&primelock);
-	pthread_mutex_destroy(&totlock);
+#ifndef _WIN32
+	pthread_mutex_destroy(&_prime_count_lock);
+	pthread_mutex_destroy(&_total_count_lock);
 #endif
+
 	return 0;
 }
