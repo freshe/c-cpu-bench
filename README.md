@@ -1,4 +1,4 @@
-Simple CPU-tester
+Simple CPU bench/test
 
 How to use: ./cputest
 
