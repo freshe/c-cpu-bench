@@ -49,7 +49,7 @@ int main(int argc, char **argv)
 		die("pthread_mutex_init failed");
 #endif
 
-	time_t start_time, end_time, elsaped_time;
+	time_t start_time, end_time, elapsed_time;
 	time(&start_time);
 	
 	for (i = 0; i < number_of_threads; i++)
@@ -96,9 +96,9 @@ int main(int argc, char **argv)
 	}
 	
 	time(&end_time);
-	elsaped_time = end_time - start_time;
+	elapsed_time = end_time - start_time;
 	
-	printf("\nFound %ld primes in %ld seconds\n", _prime_count, elsaped_time);
+	printf("\nFound %ld primes in %ld seconds\n", _prime_count, elapsed_time);
 	
 #ifndef _WIN32
 	pthread_mutex_destroy(&_prime_count_lock);
