@@ -20,8 +20,7 @@ extern pthread_mutex_t _total_count_lock;
 extern unsigned long _prime_count;
 extern unsigned long _total_count;
 
-struct range
-{
+struct range {
 	unsigned long from;
 	unsigned long to;
 };
