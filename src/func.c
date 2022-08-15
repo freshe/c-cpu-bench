@@ -128,10 +128,8 @@ void parse_args(int argc, char *argv[], unsigned long *n, int *t)
 	for (i = 1; i < argc; i++)
 	{
 		if (argv[i][0] != '-')
-		{
 			continue;
-		}
-
+		
 		if (argc > i + 1)
 		{
 			switch(argv[i][1])

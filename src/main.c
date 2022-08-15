@@ -24,13 +24,13 @@ int main(int argc, char **argv)
 {
 	print_header();
 
-	int number_of_threads = get_processor_count();
 	const unsigned long default_number = 100000000;
-
 	unsigned long big_number = default_number;
 	unsigned long from_number, to_number;
 	int i;
 	
+	int number_of_threads = get_processor_count();
+
 	if (argc > 1)
 		parse_args(argc, argv, &big_number, &number_of_threads);
 
@@ -77,14 +77,11 @@ int main(int argc, char **argv)
 		thread_range.to = to_number;
 		ranges[i] = thread_range;
 				
-		#ifdef DEBUG
+#ifdef DEBUG
 		printf("f: %ld t: %ld\n", from_number, to_number);
-		#endif
+#endif
 
-		/*
-		 *	_beginthreadex returns 0 on error
-		 *	pthread returns 0 on success :)
-		 */
+		/* _beginthreadex returns 0 on error. pthread returns 0 on success :) */
 #ifdef _WIN32
 		threads[i] = (HANDLE)(intptr_t)_beginthreadex(NULL, 0, &crunch_range_on_thread, &ranges[i], 0, &thread_ids[i]);
 		if (threads[i] == 0)

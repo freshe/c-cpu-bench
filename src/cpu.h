@@ -21,8 +21,8 @@ extern unsigned long _prime_count;
 extern unsigned long _total_count;
 
 struct range {
-	unsigned long from;
-	unsigned long to;
+    unsigned long from;
+    unsigned long to;
 };
 
 void print_progress(unsigned long *);
