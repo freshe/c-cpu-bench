@@ -26,7 +26,8 @@ struct range
 	unsigned long to;
 };
 
-void show_progress(unsigned long *);
+void print_progress(unsigned long *);
+void print_progress_until_complete(unsigned long *);
 int get_processor_count();
 int is_prime(unsigned long);
 void increment_prime_count();

@@ -25,30 +25,34 @@ int main(int argc, char **argv)
 	print_header();
 
 	int number_of_threads = get_processor_count();
+	const unsigned long default_number = 100000000;
+
+	unsigned long big_number = default_number;
+	unsigned long from_number, to_number;
+	int i;
 	
+	if (argc > 1)
+		parse_args(argc, argv, &big_number, &number_of_threads);
+
+	if (big_number <= 0)
+		big_number = default_number;
+
+	unsigned long numbers_per_thread = ceil( (big_number / number_of_threads) );
+
+	if (big_number < 100)
+	{
+		/* don't even bother splitting up the work */
+		number_of_threads = 1;
+		numbers_per_thread = big_number;
+	}
+
 #ifdef _WIN32
 	HANDLE threads[number_of_threads];
 	unsigned thread_ids[number_of_threads];
 #else
 	pthread_t threads[number_of_threads];
 #endif
-	const unsigned long default_number = 100000000;
-	unsigned long big_number = default_number;
-	unsigned long from_number, to_number;
-	int i;
-	
-	if (argc >1)
-		parse_args(argc, argv, &big_number, &number_of_threads);
-
-	if (big_number <= 0)
-		big_number = default_number;
-	
-	/* Number of operations per thread */
-	unsigned long numbers_per_thread = ceil( (big_number / number_of_threads) );
 	struct range ranges[number_of_threads];
-	
-	printf("crunching primes from number %ld using %d threads\n", big_number, number_of_threads);
-	fflush(stdout);
 
 #ifndef _WIN32
 	if (pthread_mutex_init(&_prime_count_lock, NULL) != 0)
@@ -56,6 +60,9 @@ int main(int argc, char **argv)
 	if (pthread_mutex_init(&_total_count_lock, NULL) != 0)
 		die("pthread_mutex_init failed");
 #endif
+	printf("crunching primes from number %ld using %d threads\n", big_number, number_of_threads);
+	fflush(stdout);
+
 	time_t start_time, end_time, elapsed_time;
 	time(&start_time);
 
@@ -90,7 +97,7 @@ int main(int argc, char **argv)
 	}
 
 	printf("\n");
-	show_progress(&big_number);
+	print_progress_until_complete(&big_number);
 
 #ifdef _WIN32
 	WaitForMultipleObjects(number_of_threads, threads, 1, INFINITE);
@@ -109,6 +116,7 @@ int main(int argc, char **argv)
 	time(&end_time);
 	elapsed_time = end_time - start_time;
 	
+	print_progress(&big_number);
 	printf("\nFound %ld primes in %ld seconds\n", _prime_count, elapsed_time);
 	
 #ifndef _WIN32

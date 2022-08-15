@@ -5,23 +5,25 @@
 
 #include "cpu.h"
 
-void show_progress(unsigned long *n)
+void print_progress(unsigned long *n)
 {
-	double progress = 0;
-	
-	while(_total_count < (*n))
+	double progress = 100.0 * _total_count / (*n);
+	printf("\r");
+	printf("%d%% (%lu/%lu)", (int)progress, _total_count, *n);
+	fflush(stdout);
+}
+
+void print_progress_until_complete(unsigned long *n)
+{
+	do
 	{
-		progress = 100.0 * _total_count / (*n);
-		
-		printf("\r");
-		printf("%d%% (%lu/%lu)", (int)progress, _total_count, *n);
-		fflush(stdout);
+		print_progress(n);
 #ifdef _WIN32
 		Sleep(1000);
 #else
 		sleep(1);
 #endif
-	}
+	} while (_total_count < (*n));
 }
 
 int get_processor_count()
@@ -51,7 +53,7 @@ int is_prime(unsigned long number)
 	if (number <= 1) 
 		return 0;
 	
-	unsigned long j, start = ceil(sqrt(number));
+	unsigned long j, start = floor(sqrt(number));
 	int is_prime = 1;
 
 	for (j = start; j >= 2; j--)
@@ -96,7 +98,7 @@ void crunch_range(unsigned long from, unsigned long to)
 	{
 		if (is_prime(i))
 			increment_prime_count();
-		
+
 		increment_total_count();
 	}
 }
@@ -123,14 +125,14 @@ void parse_args(int argc, char *argv[], unsigned long *n, int *t)
 {
 	int i;
 
-	for(i = 1; i < argc; i++)
+	for (i = 1; i < argc; i++)
 	{
 		if (argv[i][0] != '-')
 		{
 			continue;
 		}
 
-		if (argc > i+1)
+		if (argc > i + 1)
 		{
 			switch(argv[i][1])
 			{
