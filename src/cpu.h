@@ -32,8 +32,8 @@ int is_prime(unsigned long);
 void increment_prime_count();
 void increment_total_count();
 void crunch_range(unsigned long, unsigned long);
-void parse_args(int argc, char **, unsigned long *, int *);
-void die(char * msg);
+void parse_args(int, char **, unsigned long *, int *);
+void die(char *);
 
 #ifdef _WIN32
 unsigned __stdcall crunch_range_on_thread(void *);
