@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 	if (pthread_mutex_init(&_total_count_lock, NULL) != 0)
 		die("pthread_mutex_init failed");
 #endif
-	printf("crunching primes from number %ld using %d threads\n", big_number, number_of_threads);
+	printf("crunching primes from number %lu using %d threads\n", big_number, number_of_threads);
 	fflush(stdout);
 
 	time_t start_time, end_time, elapsed_time;
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 		ranges[i] = thread_range;
 				
 #ifdef DEBUG
-		printf("f: %ld t: %ld\n", from_number, to_number);
+		printf("f: %lu t: %lu\n", from_number, to_number);
 #endif
 
 		/* _beginthreadex returns 0 on error. pthread returns 0 on success :) */
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 	for (i = 0; i < number_of_threads; i++)
 	{
 #ifdef _WIN32
-		CloseHandle(thread[i]);
+		CloseHandle(threads[i]);
 #else
 		if (pthread_join(threads[i], NULL) != 0)
 			die("Error joining thread");
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 	elapsed_time = end_time - start_time;
 	
 	print_progress(&big_number);
-	printf("\nFound %ld primes in %ld seconds\n", _prime_count, elapsed_time);
+	printf("\nFound %lu primes in %ld seconds\n", _prime_count, elapsed_time);
 	
 #ifndef _WIN32
 	pthread_mutex_destroy(&_prime_count_lock);
