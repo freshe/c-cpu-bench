@@ -13,6 +13,8 @@ pthread_mutex_t _prime_count_lock;
 pthread_mutex_t _total_count_lock;
 #endif
 
+#define MAX_NUMBER_OF_THREADS 1024
+
 void print_header() 
 {
 	printf("\nsimple cpu benchmark\n");
@@ -20,7 +22,7 @@ void print_header()
 	fflush(stdout);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
 	print_header();
 
@@ -33,6 +35,10 @@ int main(int argc, char **argv)
 
 	if (argc > 1)
 		parse_args(argc, argv, &big_number, &number_of_threads);
+
+	if (number_of_threads > MAX_NUMBER_OF_THREADS) {
+		die("Too many threads");
+	}
 
 	if (big_number <= 0)
 		big_number = default_number;
@@ -47,12 +53,12 @@ int main(int argc, char **argv)
 	}
 
 #ifdef _WIN32
-	HANDLE threads[number_of_threads];
-	unsigned thread_ids[number_of_threads];
+	HANDLE threads[MAX_NUMBER_OF_THREADS];
+	unsigned thread_ids[MAX_NUMBER_OF_THREADS];
 #else
-	pthread_t threads[number_of_threads];
+	pthread_t threads[MAX_NUMBER_OF_THREADS];
 #endif
-	struct range ranges[number_of_threads];
+	struct range ranges[MAX_NUMBER_OF_THREADS];
 
 #ifndef _WIN32
 	if (pthread_mutex_init(&_prime_count_lock, NULL) != 0)

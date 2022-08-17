@@ -121,7 +121,7 @@ void *crunch_range_on_thread(void *args)
 }
 #endif
 
-void parse_args(int argc, char *argv[], unsigned long *n, int *t)
+void parse_args(int argc, char** argv, unsigned long *n, int *t)
 {
 	int i;
 
