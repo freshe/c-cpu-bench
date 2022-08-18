@@ -66,13 +66,12 @@ int main(int argc, char* argv[])
 	printf("crunching primes from number %lu using %d threads\n", big_number, number_of_threads);
 	fflush(stdout);
 
-	time_t start_time, end_time, elapsed_time;
-	time(&start_time);
-
 	int i;
 	unsigned long from_number, to_number;
-	
+	time_t start_time, end_time, elapsed_time;
+
 	from_number = 1;
+	time(&start_time);
 
 	for (i = 0; i < number_of_threads; i++)
 	{
