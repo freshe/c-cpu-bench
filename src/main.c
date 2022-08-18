@@ -28,17 +28,14 @@ int main(int argc, char* argv[])
 
 	const unsigned long default_number = 100000000;
 	unsigned long big_number = default_number;
-	unsigned long from_number, to_number;
-	int i;
 	
 	int number_of_threads = get_processor_count();
 
 	if (argc > 1)
 		parse_args(argc, argv, &big_number, &number_of_threads);
 
-	if (number_of_threads > MAX_NUMBER_OF_THREADS) {
+	if (number_of_threads > MAX_NUMBER_OF_THREADS)
 		die("Too many threads");
-	}
 
 	if (big_number <= 0)
 		big_number = default_number;
@@ -72,7 +69,11 @@ int main(int argc, char* argv[])
 	time_t start_time, end_time, elapsed_time;
 	time(&start_time);
 
+	int i;
+	unsigned long from_number, to_number;
+	
 	from_number = 1;
+
 	for (i = 0; i < number_of_threads; i++)
 	{
 		struct range thread_range;
