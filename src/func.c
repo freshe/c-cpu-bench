@@ -5,15 +5,69 @@
 
 #include "cpu.h"
 
-void print_progress(unsigned long *n)
+struct range *get_ranges(unsigned long n, int c) 
 {
-	double progress = 100.0 * _total_count / (*n);
-	printf("\r");
-	printf("%d%% (%lu/%lu)", (int)progress, _total_count, *n);
+	unsigned long size = floor(n / c);
+	unsigned long remainder = n % c;
+	unsigned long f, t;
+	int i;
+
+	struct range *ranges = malloc(c * sizeof(*ranges));
+
+	if (ranges == NULL)
+		die("Error allocating memory");
+
+	f = 1;
+	t = size + remainder;
+
+	for (i = 0; i < c; i++)
+	{
+		struct range item;
+		item.from = f;
+		item.to = t;
+		ranges[i] = item;
+
+		f = t + 1;
+		t = f + size;
+
+		if (t > n)
+			t = n;
+	}
+
+	return ranges;
+}
+
+void free_ranges(struct range *ranges) 
+{
+	free(ranges);
+}
+
+void print_progress(unsigned long n)
+{
+	char buf[PROGRESS_BAR_LENGTH + 1];
+
+	int progress = floor(100.0 * _total_count / n);
+	int progress_bar_count = floor(progress / 100.0 * PROGRESS_BAR_LENGTH);
+	int i;
+	
+	printf("\r[");
+	
+	for (i = 0; i < PROGRESS_BAR_LENGTH; i++)
+	{
+		if ((i + 1) <= progress_bar_count)
+			buf[i] = '=';
+		else
+			buf[i] = ' ';
+	}
+
+	buf[i + 1] = '\0';
+	printf("%s", buf);
+	printf("] %d%% (%lu/%lu)", progress, _total_count, n);
+
 	fflush(stdout);
 }
 
-void print_progress_until_complete(unsigned long *n)
+void print_progress_until_complete(unsigned long n)
 {
 	do
 	{
@@ -23,7 +77,7 @@ void print_progress_until_complete(unsigned long *n)
 #else
 		sleep(1);
 #endif
-	} while (_total_count < (*n));
+	} while (_total_count < n);
 }
 
 int get_processor_count()
@@ -32,10 +86,10 @@ int get_processor_count()
 
 #ifdef _WIN32
 	LPSYSTEM_INFO info = malloc(sizeof(SYSTEM_INFO));
-	if (info == NULL) 
-	{
+
+	if (info == NULL)
 		die("Error allocating memory");
-	}
+	
 	GetNativeSystemInfo(info);
 	count = (int)info->dwNumberOfProcessors;
 	free(info);
