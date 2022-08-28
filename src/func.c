@@ -44,7 +44,7 @@ void free_ranges(struct range *ranges)
 
 void print_progress(unsigned long long n)
 {
-	char buf[PROGRESS_BAR_LENGTH + 1];
+	char buf[PROGRESS_BAR_LENGTH];
 
 	int progress = floor(100.0 * _total_count / n);
 	int progress_bar_count = floor(progress / 100.0 * PROGRESS_BAR_LENGTH);
@@ -60,7 +60,6 @@ void print_progress(unsigned long long n)
 			buf[i] = ' ';
 	}
 
-	buf[i + 1] = '\0';
 	printf("%s", buf);
 	printf("] %d%% (%llu/%llu)", progress, _total_count, n);
 
@@ -125,7 +124,7 @@ int is_prime(unsigned long long number)
 void increment_prime_count()
 {
 #ifdef _WIN32
-	InterlockedExchangeAdd(&_prime_count, 1);
+	InterlockedExchangeAdd64(&_prime_count, 1);
 #else
 	pthread_mutex_lock(&_prime_count_lock);
 	_prime_count++;
@@ -136,7 +135,7 @@ void increment_prime_count()
 void increment_total_count()
 {
 #ifdef _WIN32
-	InterlockedExchangeAdd(&_total_count, 1);
+	InterlockedExchangeAdd64(&_total_count, 1);
 #else
 	pthread_mutex_lock(&_total_count_lock);
 	_total_count++;
