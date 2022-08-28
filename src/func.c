@@ -5,11 +5,11 @@
 
 #include "cpu.h"
 
-struct range *get_ranges(unsigned long n, int c) 
+struct range *get_ranges(unsigned long long n, int c) 
 {
-	unsigned long size = floor(n / c);
-	unsigned long remainder = n % c;
-	unsigned long f, t;
+	unsigned long long size = floor(n / c);
+	unsigned long long remainder = n % c;
+	unsigned long long f, t;
 	int i;
 
 	struct range *ranges = malloc(c * sizeof(*ranges));
@@ -42,7 +42,7 @@ void free_ranges(struct range *ranges)
 	free(ranges);
 }
 
-void print_progress(unsigned long n)
+void print_progress(unsigned long long n)
 {
 	char buf[PROGRESS_BAR_LENGTH + 1];
 
@@ -62,12 +62,12 @@ void print_progress(unsigned long n)
 
 	buf[i + 1] = '\0';
 	printf("%s", buf);
-	printf("] %d%% (%lu/%lu)", progress, _total_count, n);
+	printf("] %d%% (%llu/%llu)", progress, _total_count, n);
 
 	fflush(stdout);
 }
 
-void print_progress_until_complete(unsigned long n)
+void print_progress_until_complete(unsigned long long n)
 {
 	do
 	{
@@ -102,12 +102,12 @@ int get_processor_count()
 	return count;
 }
 
-int is_prime(unsigned long number)
+int is_prime(unsigned long long number)
 {
 	if (number <= 1) 
 		return 0;
 	
-	unsigned long j, start = floor(sqrt(number));
+	unsigned long long j, start = floor(sqrt(number));
 	int is_prime = 1;
 
 	for (j = start; j >= 2; j--)
@@ -144,9 +144,9 @@ void increment_total_count()
 #endif
 }
 
-void crunch_range(unsigned long from, unsigned long to)
+void crunch_range(unsigned long long from, unsigned long long to)
 {
-	unsigned long i;
+	unsigned long long i;
 
 	for (i = from; i <= to; i++)
 	{
@@ -175,7 +175,7 @@ void *crunch_range_on_thread(void *args)
 }
 #endif
 
-void parse_args(int argc, char** argv, unsigned long *n, int *t)
+void parse_args(int argc, char** argv, unsigned long long *n, int *t)
 {
 	int i;
 

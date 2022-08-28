@@ -21,25 +21,25 @@ extern pthread_mutex_t _total_count_lock;
 #define DEFAULT_NUMBER 100000000
 #define PROGRESS_BAR_LENGTH 30
 
-extern unsigned long _prime_count;
-extern unsigned long _total_count;
+extern unsigned long long _prime_count;
+extern unsigned long long _total_count;
 
 struct range {
-    unsigned long from;
-    unsigned long to;
+    unsigned long long from;
+    unsigned long long to;
 };
 
-void print_progress(unsigned long);
-void print_progress_until_complete(unsigned long);
+void print_progress(unsigned long long);
+void print_progress_until_complete(unsigned long long);
 int get_processor_count();
-int is_prime(unsigned long);
+int is_prime(unsigned long long);
 void increment_prime_count();
 void increment_total_count();
-void crunch_range(unsigned long, unsigned long);
-void parse_args(int, char**, unsigned long *, int *);
+void crunch_range(unsigned long long, unsigned long long);
+void parse_args(int, char**, unsigned long long *, int *);
 void die(char *);
 
-struct range *get_ranges(unsigned long, int);
+struct range *get_ranges(unsigned long long, int);
 void free_ranges(struct range *); 
 
 #ifdef _WIN32

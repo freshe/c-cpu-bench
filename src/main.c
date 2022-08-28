@@ -5,8 +5,8 @@
 
 #include "cpu.h"
 
-unsigned long _prime_count = 0;
-unsigned long _total_count = 0;
+unsigned long long _prime_count = 0;
+unsigned long long _total_count = 0;
 
 #ifndef _WIN32
 pthread_mutex_t _prime_count_lock;
@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 {
 	print_header();
 
-	unsigned long big_number = DEFAULT_NUMBER;
+	unsigned long long big_number = DEFAULT_NUMBER;
 	int number_of_threads = get_processor_count();
 
 	if (argc > 1)
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
 	if (pthread_mutex_init(&_total_count_lock, NULL) != 0)
 		die("pthread_mutex_init failed");
 #endif
-	printf("crunching primes from number %lu using %d threads\n", big_number, number_of_threads);
+	printf("crunching primes from number %llu using %d threads\n", big_number, number_of_threads);
 	fflush(stdout);
 
 	int i;
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 	for (i = 0; i < number_of_threads; i++)
 	{	
 #ifdef DEBUG
-		printf("f: %lu t: %lu\n", ranges[i].from, ranges[i].to);
+		printf("f: %llu t: %llu\n", ranges[i].from, ranges[i].to);
 #endif
 
 		/* _beginthreadex returns 0 on error. pthread returns 0 on success :) */
@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
 	elapsed_time = end_time - start_time;
 	
 	print_progress(big_number);
-	printf("\n\nFound %lu primes in %ld seconds\n\n", _prime_count, elapsed_time);
+	printf("\n\nFound %llu primes in %ld seconds\n\n", _prime_count, elapsed_time);
 	
 #ifndef _WIN32
 	pthread_mutex_destroy(&_prime_count_lock);
