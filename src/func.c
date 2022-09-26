@@ -68,15 +68,15 @@ void print_progress(unsigned long long n)
 
 void print_progress_until_complete(unsigned long long n)
 {
-	do
+	while (_total_count < n)
 	{
 		print_progress(n);
 #ifdef _WIN32
-		Sleep(1000);
+		Sleep(10);
 #else
-		sleep(1);
+		usleep(10000);
 #endif
-	} while (_total_count < n);
+	}
 }
 
 int get_processor_count()
@@ -121,24 +121,24 @@ int is_prime(unsigned long long number)
 	return is_prime;
 }
 
-void increment_prime_count()
+void increment_prime_count(unsigned long long n)
 {
 #ifdef _WIN32
-	InterlockedExchangeAdd64(&_prime_count, 1);
+	InterlockedExchangeAdd64(&_prime_count, n);
 #else
 	pthread_mutex_lock(&_prime_count_lock);
-	_prime_count++;
+	_prime_count += n;
 	pthread_mutex_unlock(&_prime_count_lock);
 #endif
 }
 
-void increment_total_count()
+void increment_total_count(unsigned long long n)
 {
 #ifdef _WIN32
-	InterlockedExchangeAdd64(&_total_count, 1);
+	InterlockedExchangeAdd64(&_total_count, n);
 #else
 	pthread_mutex_lock(&_total_count_lock);
-	_total_count++;
+	_total_count += n;
 	pthread_mutex_unlock(&_total_count_lock);
 #endif
 }
@@ -146,14 +146,26 @@ void increment_total_count()
 void crunch_range(unsigned long long from, unsigned long long to)
 {
 	unsigned long long i;
+	unsigned long long prime_count = 0;
+	unsigned long long total_count = 0;
 
 	for (i = from; i <= to; i++)
 	{
 		if (is_prime(i))
-			increment_prime_count();
+			prime_count++;
 
-		increment_total_count();
+		total_count++;
+
+		if (i % 100000 == 0) {
+			increment_prime_count(prime_count);
+			increment_total_count(total_count);
+			prime_count = 0;
+			total_count = 0;
+		}
 	}
+
+	increment_prime_count(prime_count);
+	increment_total_count(total_count);
 }
 
 #ifdef _WIN32
