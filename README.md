@@ -1,4 +1,5 @@
-Simple CPU bench/test
+<h1>CPU benchmark / test</h1>
+<h2>A simple prime number cpu benchmark tool</h2>
 
 How to use: ./cputest
 

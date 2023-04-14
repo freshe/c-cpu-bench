@@ -44,10 +44,10 @@ void free_ranges(struct range *ranges)
 
 void print_progress(unsigned long long n)
 {
-	char buf[PROGRESS_BAR_LENGTH];
+	char buf[PROGRESS_BAR_LENGTH + 1];
 
-	int progress = floor(100.0 * _total_count / n);
-	int progress_bar_count = floor(progress / 100.0 * PROGRESS_BAR_LENGTH);
+	int progress = ceil(100.0 * _total_count / n);
+	int progress_bar_count = ceil(progress / 100.0 * PROGRESS_BAR_LENGTH);
 	int i;
 	
 	printf("\r[");
@@ -59,7 +59,8 @@ void print_progress(unsigned long long n)
 		else
 			buf[i] = ' ';
 	}
-
+	
+	buf[i] = '\0';
 	printf("%s", buf);
 	printf("] %d%% (%llu/%llu)", progress, _total_count, n);
 
@@ -103,22 +104,23 @@ int get_processor_count()
 
 int is_prime(unsigned long long number)
 {
-	if (number <= 1) 
+	if (number < 2) 
+		return 0;
+
+	if (number == 2 || number == 3)
+		return 1;
+
+	if (number % 2 == 0 || number % 3 == 0)
 		return 0;
 	
-	unsigned long long j, start = floor(sqrt(number));
-	int is_prime = 1;
+	unsigned long long j, end = ceil(sqrt(number));
 
-	for (j = start; j >= 2; j--)
-	{
-		if (number % j == 0) 
-		{
-			is_prime = 0;
-			break;
-		}
+	for (j = 5; j <= end; j++) {
+		if (number % j == 0)
+			return 0;
 	}
 
-	return is_prime;
+	return 1;
 }
 
 void increment_prime_count(unsigned long long n)

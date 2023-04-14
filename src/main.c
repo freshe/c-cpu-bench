@@ -48,12 +48,14 @@ int main(int argc, char* argv[])
 	pthread_t threads[MAX_NUMBER_OF_THREADS];
 #endif
 	
+
 #ifndef _WIN32
 	if (pthread_mutex_init(&_prime_count_lock, NULL) != 0)
 		die("pthread_mutex_init failed");
 	if (pthread_mutex_init(&_total_count_lock, NULL) != 0)
 		die("pthread_mutex_init failed");
 #endif
+
 	printf("crunching primes from number %llu using %d threads\n", big_number, number_of_threads);
 	fflush(stdout);
 
@@ -70,7 +72,7 @@ int main(int argc, char* argv[])
 
 		/* _beginthreadex returns 0 on error. pthread returns 0 on success :) */
 #ifdef _WIN32
-		threads[i] = (HANDLE)(intptr_t)_beginthreadex(NULL, 0, &crunch_range_on_thread, &ranges[i], 0, &thread_ids[i]);
+		threads[i] = (HANDLE)_beginthreadex(NULL, 0, &crunch_range_on_thread, &ranges[i], 0, &thread_ids[i]);
 		
 		if (threads[i] == 0)
 			die("Error creating thread");
@@ -102,7 +104,7 @@ int main(int argc, char* argv[])
 	
 	print_progress(big_number);
 	printf("\n\nFound %llu primes in %ld seconds\n\n", _prime_count, elapsed_time);
-	
+
 #ifndef _WIN32
 	pthread_mutex_destroy(&_prime_count_lock);
 	pthread_mutex_destroy(&_total_count_lock);
