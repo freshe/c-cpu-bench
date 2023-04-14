@@ -72,10 +72,13 @@ int main(int argc, char* argv[])
 
         /* _beginthreadex returns 0 on error. pthread returns 0 on success :) */
 #ifdef _WIN32
-        threads[i] = (HANDLE)_beginthreadex(NULL, 0, &crunch_range_on_thread, &ranges[i], 0, &thread_ids[i]);
+        HANDLE hThread;
+        hThread = (HANDLE)(uintptr_t)_beginthreadex(NULL, 0, &crunch_range_on_thread, &ranges[i], 0, &thread_ids[i]);
         
-        if (threads[i] == 0)
+        if (hThread == 0)
             die("Error creating thread");
+
+        threads[i] = hThread;
 #else	
         if (pthread_create(&threads[i], NULL, &crunch_range_on_thread, &ranges[i]) != 0)
             die("Error creating thread");
