@@ -61,7 +61,6 @@ int main(int argc, char* argv[])
 
     int i;
     time_t start_time, end_time, elapsed_time;
-    
     time(&start_time);
 
     for (i = 0; i < number_of_threads; i++)
